@@ -573,10 +573,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shader: {fileID: 7200000, guid: 5906d19d9e143491a84c9c14422420e5, type: 3}
-  height: 0.411
-  softenEdge: 62.4
-  shade: 0.504
-  tintStrength: 0.718
+  height: 0.497
+  softenEdge: 31.8
+  shade: 0.519
+  tintStrength: 0.628
   tintColor: {r: 1, g: 0.44707993, b: 0.1462264, a: 1}
 --- !u!1 &1775990536
 GameObject:

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteInEditMode]
 public class NightVision : BaseCompletePP
 {
     [Range(0.0f, 100.0f)]
@@ -12,8 +11,10 @@ public class NightVision : BaseCompletePP
     [Range(0.0f, 100.0f)]
     public float softenEdge = 3;
     public Color tint = Color.green;
-    [Range(50, 500)]
+    [Range(2, 500)]
     public int lines = 100;
+
+    public Transform target;
 
     private void OnValidate()
     {
@@ -36,6 +37,9 @@ public class NightVision : BaseCompletePP
     protected override void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         shader.SetFloat("time", Time.time);
+        Vector2 pos = Camera.main.WorldToScreenPoint(target.position);
+        Vector4 center = new Vector4(pos.x, pos.y, 0.0f, 0.0f);
+        shader.SetVector("center", center);
         base.OnRenderImage(source, destination);
     }
 }

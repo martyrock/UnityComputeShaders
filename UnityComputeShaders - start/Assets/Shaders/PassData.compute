@@ -1,11 +1,13 @@
-﻿// Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel Circles
+﻿#pragma kernel Circles
+#pragma kernel BaseColor
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
-RWTexture2D<float4> Result;
-
+shared RWTexture2D<float4> Result;
+float4 ClearColor;
+float4 CircleColor;
 int texResolution;
+float time;
 
 /*Returns pseudo random number in range 0 <= x < 1 */
 float random(float value, float seed = 0.546){
@@ -20,18 +22,18 @@ float2 random2(float value){
 	);
 }
 
-void plot1( int x, int y, int2 centre){
-    Result[uint2(centre.x + x, centre.y + y)] = float4( 1, 0, 0, 1 );
+void plot1( int x, int y, int2 centre, float4 color){
+    Result[uint2(centre.x + x, centre.y + y)] = color;
 }
 
-void plot8( int x, int y, int2 centre ) {
-	plot1(  x,  y, centre );  plot1(  y,  x, centre );
-	plot1(  x, -y, centre );  plot1(  y, -x, centre );
-	plot1( -x, -y, centre );  plot1( -y, -x, centre );
-	plot1( -x,  y, centre );  plot1( -y,  x, centre );
+void plot8( int x, int y, int2 centre, float4 color) {
+	plot1(  x,  y, centre, color);  plot1(  y,  x, centre, color);
+	plot1(  x, -y, centre, color);  plot1(  y, -x, centre, color);
+	plot1( -x, -y, centre, color);  plot1( -y, -x, centre, color);
+	plot1(-x, y, centre, color);  plot1(-y, x, centre, color);
 }
 
-void drawCircle( int2 centre, int radius ) {
+void drawCircle( int2 centre, int radius, float4 color ) {
 	int x = 0;
 	int y = radius;
 	int d = 1 - radius;
@@ -44,18 +46,26 @@ void drawCircle( int2 centre, int radius ) {
 			y--;
 		}
 		
-		plot8(x, y, centre);
+		plot8(x, y, centre, color);
 
 		x++;
 	}
 }
 
-[numthreads(1,1,1)]
+[numthreads(32,1,1)]
 void Circles (uint3 id : SV_DispatchThreadID)
 {
-	int2 centre = (texResolution >> 1);
-	int radius = 80;
-	drawCircle( centre, radius );
+	int2 centre = (int2)(random2((float)id.x + time)*(float)texResolution);
+	int radius = (int)(random((float)id.x)*30);
+	if(id.x > 0)
+		drawCircle( centre, radius, float4(1.0, 0.0, 0.0, 1.0) );
+	else
+		drawCircle(centre, radius, CircleColor);
 }
 
+[numthreads(8, 8, 1)]
+void BaseColor(uint3 id : SV_DispatchThreadID)
+{
+	Result[id.xy] = ClearColor;
+}
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteInEditMode]
 public class HUDOverlay : BaseCompletePP
 {
     public Color axisColor = new Color(0.8f, 0.8f, 0.8f, 1);

@@ -1,18 +1,17 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public class Challenge1 : MonoBehaviour
+public class AssignTexture : MonoBehaviour
 {
-
     public ComputeShader shader;
-    public int texResolution = 1024;
+    public int texResolution = 256;
+    public string kernelName = "SplitScreen";
 
     Renderer rend;
     RenderTexture outputTexture;
-
     int kernelHandle;
 
-    // Use this for initialization
     void Start()
     {
         outputTexture = new RenderTexture(texResolution, texResolution, 0);
@@ -21,21 +20,16 @@ public class Challenge1 : MonoBehaviour
 
         rend = GetComponent<Renderer>();
         rend.enabled = true;
-
         InitShader();
     }
 
     private void InitShader()
     {
-        kernelHandle = shader.FindKernel("Square");
-
-		//Create a Vector4 with parameters x, y, width, height
-        //Pass this to the shader using SetVector
-        
+        kernelHandle = shader.FindKernel(kernelName);
         shader.SetTexture(kernelHandle, "Result", outputTexture);
-        shader.SetInt("Resolution", texResolution);
+        shader.SetInt("TexResolution", texResolution);
+        shader.SetFloats("Color", new float[] { 1.0f, 0.0f, 0.0f, 1.0f});
         rend.material.SetTexture("_MainTex", outputTexture);
-
         DispatchShader(texResolution / 8, texResolution / 8);
     }
 
@@ -44,7 +38,7 @@ public class Challenge1 : MonoBehaviour
         shader.Dispatch(kernelHandle, x, y, 1);
     }
 
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyUp(KeyCode.U))
         {
@@ -52,4 +46,3 @@ public class Challenge1 : MonoBehaviour
         }
     }
 }
-

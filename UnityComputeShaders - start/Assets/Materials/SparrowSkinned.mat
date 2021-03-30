@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: SparrowSkinned
   m_Shader: {fileID: 4800000, guid: 2d4a2d965cfd64659aec179e12b2aa46, type: 3}
-  m_ShaderKeywords: FRAME_INTERPOLATION
+  m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0

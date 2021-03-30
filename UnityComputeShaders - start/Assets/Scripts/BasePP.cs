@@ -73,7 +73,24 @@ public class BasePP : MonoBehaviour
 
     protected virtual void CreateTextures()
     {
-        
+        texSize.x = thisCamera.pixelWidth;
+        texSize.y = thisCamera.pixelHeight;
+
+        if (shader != null)
+        {
+            uint x, y;
+            shader.GetKernelThreadGroupSizes(kernelHandle, out x, out y, out _);
+
+            //IL TIZIO HA FATTO DIVERSO QUI, se non funziona guarda se centra qualcosa qui!!
+            groupSize.x = Mathf.CeilToInt( texSize.x / x);
+            groupSize.y = Mathf.CeilToInt( texSize.y / y);
+        }
+
+        CreateTexture(ref output);
+        CreateTexture(ref renderedSource);
+
+        shader.SetTexture(kernelHandle, "source", renderedSource);
+        shader.SetTexture(kernelHandle, "output", output);
     }
 
     protected virtual void OnEnable()
@@ -95,12 +112,26 @@ public class BasePP : MonoBehaviour
 
     protected virtual void DispatchWithSource(ref RenderTexture source, ref RenderTexture destination)
     {
-        
+        //Copy into the compute shader
+        Graphics.Blit(source, renderedSource);
+
+        //Run compute shader
+        shader.Dispatch(kernelHandle, groupSize.x, groupSize.y, 1);
+
+        //copy result into the screen
+        Graphics.Blit(output, destination);
     }
 
     protected void CheckResolution(out bool resChange )
     {
         resChange = false;
+
+        if(texSize.x != thisCamera.pixelWidth
+            || texSize.y != thisCamera.pixelHeight)
+        {
+            resChange = true;
+            CreateTextures();
+        }
     }
 
     protected virtual void OnRenderImage(RenderTexture source, RenderTexture destination)

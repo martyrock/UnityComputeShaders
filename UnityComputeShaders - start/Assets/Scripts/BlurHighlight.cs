@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteInEditMode]
 public class BlurHighlight : BaseCompletePP
 {
     [Range(0, 50)]
@@ -16,18 +15,30 @@ public class BlurHighlight : BaseCompletePP
     public Transform trackedObject;
 
     Vector4 center;
+    RenderTexture horzOutput = null;
+    RenderTexture vertOutput = null;
+    int kernelHorzPassID;
+    int kernelVertPassID;
 
     protected override void Init()
     {
         center = new Vector4();
         kernelName = "Highlight";
         base.Init();
-
+        kernelHorzPassID = shader.FindKernel("HorzPass");
+        kernelVertPassID = shader.FindKernel("VertPass");
     }
 
     protected override void CreateTextures()
     {
         base.CreateTextures();
+        CreateTexture(ref horzOutput);
+        CreateTexture(ref vertOutput);
+        shader.SetTexture(kernelHorzPassID, "source", renderedSource);
+        shader.SetTexture(kernelHorzPassID, "horzOutput", horzOutput);
+        shader.SetTexture(kernelVertPassID, "horzOutput", horzOutput);
+        shader.SetTexture(kernelVertPassID, "vertOutput", vertOutput);
+        shader.SetTexture(kernelHandle, "vertOutput", vertOutput);
     }
 
     private void OnValidate()
@@ -44,6 +55,7 @@ public class BlurHighlight : BaseCompletePP
         shader.SetFloat("radius", rad);
         shader.SetFloat("edgeWidth", rad * softenEdge / 100.0f);
         shader.SetFloat("shade", shade);
+        shader.SetInt("blurRadius", blurRadius);
     }
 
     protected override void DispatchWithSource(ref RenderTexture source, ref RenderTexture destination)
@@ -51,9 +63,9 @@ public class BlurHighlight : BaseCompletePP
         if (!init) return;
 
         Graphics.Blit(source, renderedSource);
-
+        shader.Dispatch(kernelHorzPassID, groupSize.x, groupSize.y, 1);
+        shader.Dispatch(kernelVertPassID, groupSize.x, groupSize.y, 1);
         shader.Dispatch(kernelHandle, groupSize.x, groupSize.y, 1);
-
         Graphics.Blit(output, destination);
     }
 

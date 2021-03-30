@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-#pragma warning disable 0649
-
 public class ParticleFun : MonoBehaviour
 {
 
@@ -28,9 +26,9 @@ public class ParticleFun : MonoBehaviour
     int kernelID;
     ComputeBuffer particleBuffer;
 
-    int groupSizeX; 
-    
-    
+    int groupSizeX;
+
+
     // Use this for initialization
     void Start()
     {
@@ -44,7 +42,25 @@ public class ParticleFun : MonoBehaviour
 
         for (int i = 0; i < particleCount; i++)
         {
-            //TO DO: Initialize particle
+            float x = Random.value * 2 - 1.0f;
+            float y = Random.value * 2 - 1.0f;
+            float z = Random.value * 2 - 1.0f;
+            Vector3 xyz = new Vector3(x, y, z);
+            xyz.Normalize();
+            xyz *= Random.value;
+            xyz *= 0.5f;
+
+
+            particleArray[i].position.x = xyz.x;
+            particleArray[i].position.y = xyz.y;
+            particleArray[i].position.z = xyz.z + 3;
+
+            particleArray[i].velocity.x = 0;
+            particleArray[i].velocity.y = 0;
+            particleArray[i].velocity.z = 0;
+
+            // Initial life value
+            particleArray[i].life = Random.value * 5.0f + 1.0f;
         }
 
         // create compute buffer
@@ -108,6 +124,6 @@ public class ParticleFun : MonoBehaviour
 
         cursorPos.x = p.x;
         cursorPos.y = p.y;
-        
+
     }
 }

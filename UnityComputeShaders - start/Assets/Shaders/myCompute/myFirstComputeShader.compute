@@ -1,0 +1,43 @@
+﻿#pragma kernel CSMain
+#pragma kernel SolidColor
+#pragma kernel SplitScreen
+#pragma kernel Circle
+
+RWTexture2D<float4> Result;
+int TexResolution;
+float4 Color;
+
+float inCircle(float2 pt, float radius) {
+    return (length(pt) < radius) ? 1.0 : 0.0;
+}
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+}
+
+[numthreads(8, 8, 1)]
+void SolidColor(uint3 id : SV_DispatchThreadID)
+{
+    Result[id.xy] = Color;
+}
+
+[numthreads(8, 8, 1)]
+void SplitScreen(uint3 id : SV_DispatchThreadID)
+{
+    //Divide resolution by two
+    int halfRes = TexResolution >> 1;
+    Result[id.xy] = float4(step(halfRes, id.x), step(halfRes, id.y),
+        0.0, 1.0);
+}
+
+[numthreads(8, 8, 1)]
+void Circle(uint3 id : SV_DispatchThreadID)
+{
+    //Divide resolution by two
+    int halfRes = TexResolution >> 1;
+    int r = inCircle((float2)((int2) id.xy - halfRes), (float)(TexResolution >> 2));
+
+    Result[id.xy] = float4(r, r, 0.0, 1.0);
+}
